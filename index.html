@@ -7,6 +7,8 @@
   <!-- CodeMirror -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.0/codemirror.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.0/theme/material.min.css">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -37,8 +39,22 @@
           <option value="phone-lg">Phone (Large) 412×915</option>
           <option value="tablet">Tablet 800×1280</option>
         </select>
-        <button id="toggleOrientationButton" class="ghost small-btn" title="Toggle portrait/landscape">
-          Portrait
+        
+        <!-- Frame style controls -->
+        <div class="frame-style-controls">
+          <button id="framePixel" class="frame-btn active" data-frame="pixel" title="Pixel frame">Pixel</button>
+          <button id="frameMinimal" class="frame-btn" data-frame="minimal" title="Minimal frame">Minimal</button>
+          <button id="frameFlat" class="frame-btn" data-frame="flat" title="Flat (no frame)">Flat</button>
+        </div>
+        
+        <!-- Theme toggle -->
+        <button id="themeToggle" class="ghost" title="Toggle dark/light mode">
+          <i class="fa-solid fa-moon"></i> Dark
+        </button>
+        
+        <!-- Orientation toggle -->
+        <button id="toggleOrientationButton" class="ghost" title="Toggle portrait/landscape">
+          <i class="fa-solid fa-mobile-screen-button"></i> Portrait
         </button>
       </div>
     </div>
@@ -50,7 +66,7 @@
     <aside class="palette">
       <div class="palette-header">
         <h2>Palette</h2>
-        <p class="palette-hint">Click an item to insert XML at the cursor (auto-indented).</p>
+        <p>Click an item to insert XML at the cursor (auto-indented).</p>
       </div>
       <div class="palette-section">
         <h3>Layouts</h3>
@@ -92,23 +108,42 @@
           <span class="badge">Live Preview</span>
         </div>
       </div>
-      <div class="device-frame">
-  <div class="device-notch"></div>
-  <div class="status-bar">
-    <span class="status-time">12:00</span>
-    <div class="status-icons">
-      <span class="status-icon">5G</span>
-      <span class="status-icon">100%</span>
-    </div>
-  </div>
-  <div id="previewPanel" class="device-screen">
-    <!-- JS will render layout here -->
-  </div>
-</div>
+      
+      <!-- Phone Frame Container -->
+      <div id="deviceContainer" class="device-container">
+        <div id="phoneShell" class="phone-shell pixel-frame">
+          <!-- Top cutout area (speaker + camera) -->
+          <div class="phone-cutout">
+            <div class="speaker"></div>
+            <div class="camera"></div>
+          </div>
+          
+          <!-- Actual screen area (screenshot target) -->
+          <div id="deviceScreen" class="device-screen">
+            <!-- Android System Status Bar -->
+            <div id="statusBar" class="status-bar">
+              <span id="statusClock">09:41</span>
+              <div class="status-icons">
+                <i class="fa-solid fa-wifi"></i>
+                <i class="fa-solid fa-signal"></i>
+                <i class="fa-solid fa-battery-full"></i>
+              </div>
+            </div>
+            
+            <!-- Main Rendered XML Canvas Viewport -->
+            <div id="androidViewport" class="android-viewport">
+              <!-- Dynamically generated DOM tree renders here -->
+            </div>
+            
+            <!-- Android System Navigation Bar -->
+            <div id="navigationBar" class="navigation-bar">
+              <div id="navHandle" class="nav-handle"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <div class="preview-footer">
-        <p class="small">
-          Click <strong>Show Preview</strong> to render your layout into the simulated view.
-        </p>
       </div>
     </section>
   </main>

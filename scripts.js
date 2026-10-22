@@ -23,7 +23,8 @@ const DEVICE_PROFILES = {
 let orientation = "portrait";
 let editor = null;
 let radioGroupCounter = 0;
-const RELATIVE_PASSES = 4;
+let currentFrame = "pixel"; // 'pixel', 'minimal', 'flat'
+let isDarkMode = true;
 
 /* =========================================================
    1) Bootstrapping (DOMContentLoaded)
@@ -86,6 +87,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // 1.3 Device controls
   const deviceSelect = document.getElementById("deviceProfile");
   const orientationBtn = document.getElementById("toggleOrientationButton");
+  const themeToggle = document.getElementById("themeToggle");
+  const frameBtns = document.querySelectorAll(".frame-btn");
 
   function applyDeviceProfile() {
     const profile = DEVICE_PROFILES[deviceSelect.value] || DEVICE_PROFILES["phone-md"];
@@ -94,15 +97,51 @@ document.addEventListener("DOMContentLoaded", () => {
     const h = orientation === "portrait" ? profile.h : profile.w;
     root.style.setProperty("--device-w", `${w}px`);
     root.style.setProperty("--device-h", `${h}px`);
-    orientationBtn.textContent = orientation === "portrait" ? "Portrait" : "Landscape";
+    updateOrientationButton();
+    updatePhoneShellSize();
+  }
+
+  function updateOrientationButton() {
+    const icon = orientationBtn.querySelector("i");
+    const text = orientationBtn.childNodes[1];
+    if (orientation === "portrait") {
+      icon.className = "fa-solid fa-mobile-screen-button";
+      if (text) text.textContent = " Portrait";
+    } else {
+      icon.className = "fa-solid fa-mobile-screen";
+      if (text) text.textContent = " Landscape";
+    }
+  }
+
+  function updatePhoneShellSize() {
+    const shell = document.getElementById("phoneShell");
+    if (!shell) return;
+    
+    // Force reflow to apply new CSS variable dimensions
+    shell.style.width = "";
+    shell.style.height = "";
   }
 
   deviceSelect.addEventListener("change", applyDeviceProfile);
+  
   orientationBtn.addEventListener("click", () => {
     orientation = orientation === "portrait" ? "landscape" : "portrait";
     applyDeviceProfile();
   });
-  applyDeviceProfile();
+
+  // Frame style buttons
+  frameBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      setDeviceFrame(btn.dataset.frame);
+    });
+  });
+
+  // Theme toggle
+  themeToggle.addEventListener("click", toggleSystemTheme);
+
+  // Initial clock update
+  updateClock();
+  setInterval(updateClock, 30000);
 
   // 1.4 Initial preview + palette
   resetPreviewToWelcome();
@@ -125,11 +164,21 @@ document.addEventListener("DOMContentLoaded", () => {
    2) Preview Panel Structure
    ========================================================= */
 function resetPreviewToWelcome() {
-  const previewPanel = document.getElementById("previewPanel");
-  previewPanel.replaceChildren();
-
-  const layoutHost = document.createElement("div");
-  layoutHost.id = "layoutHost";
+  const viewport = document.getElementById("androidViewport");
+  const warningsHost = document.getElementById("warningsHost");
+  
+  // Create warnings host if it doesn't exist
+  let warningsContainer = document.getElementById("warningsHost");
+  if (!warningsContainer) {
+    warningsContainer = document.createElement("div");
+    warningsContainer.id = "warningsHost";
+    // Insert after viewport in device-screen
+    const deviceScreen = document.getElementById("deviceScreen");
+    deviceScreen.appendChild(warningsContainer);
+  }
+  
+  viewport.replaceChildren();
+  warningsContainer.replaceChildren();
 
   const welcome = document.createElement("div");
   welcome.className = "welcome-message";
@@ -137,13 +186,7 @@ function resetPreviewToWelcome() {
     <h3>Welcome</h3>
     <p>Use the sample XML or paste your own, then click <strong>Show Preview</strong>.</p>
   `;
-  layoutHost.appendChild(welcome);
-
-  const warningsHost = document.createElement("div");
-  warningsHost.id = "warningsHost";
-
-  previewPanel.appendChild(layoutHost);
-  previewPanel.appendChild(warningsHost);
+  viewport.appendChild(welcome);
 }
 
 /* =========================================================
@@ -402,21 +445,29 @@ function insertSnippet(snippet) {
    4) Render Pipeline
    ========================================================= */
 function renderPreview(xmlCode) {
-  if (!document.getElementById("layoutHost") || !document.getElementById("warningsHost")) {
+  const viewport = document.getElementById("androidViewport");
+  let warningsHost = document.getElementById("warningsHost");
+  
+  if (!viewport) {
     resetPreviewToWelcome();
   }
+  
+  if (!warningsHost) {
+    warningsHost = document.createElement("div");
+    warningsHost.id = "warningsHost";
+    const deviceScreen = document.getElementById("deviceScreen");
+    deviceScreen.appendChild(warningsHost);
+  }
 
-  const layoutHost = document.getElementById("layoutHost");
-  const warningsHost = document.getElementById("warningsHost");
-  layoutHost.replaceChildren();
+  viewport.replaceChildren();
   warningsHost.replaceChildren();
 
   radioGroupCounter = 0;
 
   const parseResult = parseAndroidXml(xmlCode);
   if (parseResult.error) {
-    layoutHost.appendChild(makeError(parseResult.error));
-    layoutHost.appendChild(makeHintBox());
+    viewport.appendChild(makeError(parseResult.error));
+    viewport.appendChild(makeHintBox());
     return;
   }
 
@@ -432,7 +483,7 @@ function renderPreview(xmlCode) {
   };
 
   const rootNode = renderElement(parseResult.root, rootCtx);
-  layoutHost.appendChild(rootNode);
+  viewport.appendChild(rootNode);
 }
 
 function parseAndroidXml(xmlCode){
@@ -794,7 +845,7 @@ function finalizeRelativeLayout(container) {
     if (id) idMap.set(id, child);
   });
 
-  for (let pass = 0; pass < RELATIVE_PASSES; pass++) {
+  for (let pass = 0; pass < 4; pass++) {
     children.forEach(child => {
       const rulesJson = child.dataset.relativeRules;
       if (!rulesJson) return;
@@ -972,30 +1023,95 @@ function makeWarnings(items) {
 }
 
 /* =========================================================
+   Simulator Controls: Frame, Theme, Orientation
+   ========================================================= */
+function setDeviceFrame(style) {
+  currentFrame = style;
+  const shell = document.getElementById("phoneShell");
+  const frameBtns = document.querySelectorAll(".frame-btn");
+  
+  // Update button states
+  frameBtns.forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.frame === style);
+  });
+  
+  // Apply frame class
+  shell.classList.remove("pixel-frame", "minimal-frame", "flat-frame");
+  shell.classList.add(`${style}-frame`);
+}
+
+function toggleSystemTheme() {
+  isDarkMode = !isDarkMode;
+  document.documentElement.classList.toggle("light-mode", !isDarkMode);
+  
+  const themeToggle = document.getElementById("themeToggle");
+  const icon = themeToggle.querySelector("i");
+  const text = themeToggle.childNodes[1];
+  
+  if (isDarkMode) {
+    icon.className = "fa-solid fa-moon";
+    if (text) text.textContent = " Dark";
+  } else {
+    icon.className = "fa-solid fa-sun";
+    if (text) text.textContent = " Light";
+  }
+  
+  // Re-render to apply theme colors
+  if (editor) {
+    renderPreview(editor.getValue());
+  }
+}
+
+function updateClock() {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const mins = String(now.getMinutes()).padStart(2, '0');
+  const clock = document.getElementById("statusClock");
+  if (clock) clock.textContent = `${hours}:${mins}`;
+}
+
+/* =========================================================
    Screenshot Exporter
    ========================================================= */
-function takeScreenshot() {
-  const deviceFrame = document.querySelector(".device-frame");
-  if (!deviceFrame) return;
+async function captureViewport() {
+  const screenElem = document.getElementById("deviceScreen");
+  if (!screenElem) return null;
+  
+  try {
+    const canvas = await html2canvas(screenElem, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: isDarkMode ? "#0F172A" : "#FFFFFF"
+    });
+    return canvas;
+  } catch (err) {
+    console.error("Screenshot error", err);
+    alert("Failed to generate screenshot image");
+  }
+}
 
+function takeScreenshot() {
   const btn = document.getElementById("screenshotButton");
   const originalText = btn.textContent;
   btn.textContent = "Capturing...";
   btn.disabled = true;
 
-  html2canvas(deviceFrame, {
-    scale: 2,
-    useCORS: true,
-    backgroundColor: null
-  }).then(canvas => {
+  captureViewport().then(canvas => {
+    if (!canvas) {
+      btn.textContent = originalText;
+      btn.disabled = false;
+      return;
+    }
     const link = document.createElement("a");
     link.download = `android_preview_${Date.now()}.png`;
     link.href = canvas.toDataURL("image/png");
     link.click();
+    btn.textContent = originalText;
+    btn.disabled = false;
   }).catch(err => {
     console.error("Screenshot error:", err);
     alert("Could not generate screenshot.");
-  }).finally(() => {
     btn.textContent = originalText;
     btn.disabled = false;
   });
