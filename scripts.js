@@ -177,6 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function resetPreviewToWelcome() {
   const viewport = document.getElementById("androidViewport");
   const warningsHost = getOrCreateWarningsHost();
+  const previewFooter = document.querySelector(".preview-footer");
   
   viewport.replaceChildren();
   warningsHost.replaceChildren();
@@ -188,6 +189,9 @@ function resetPreviewToWelcome() {
     <p>Use the sample XML or paste your own, then click <strong>Show Preview</strong>.</p>
   `;
   viewport.appendChild(welcome);
+  
+  // Show preview footer when welcome message is shown
+  if (previewFooter) previewFooter.classList.remove("hidden");
 }
 
 function getOrCreateWarningsHost() {
@@ -461,6 +465,7 @@ function insertSnippet(snippet) {
 function renderPreview(xmlCode) {
   const viewport = document.getElementById("androidViewport");
   const warningsHost = getOrCreateWarningsHost();
+  const previewFooter = document.querySelector(".preview-footer");
   
   if (!viewport) {
     resetPreviewToWelcome();
@@ -476,6 +481,7 @@ function renderPreview(xmlCode) {
   if (parseResult.error) {
     viewport.appendChild(makeError(parseResult.error));
     viewport.appendChild(makeHintBox());
+    if (previewFooter) previewFooter.classList.remove("hidden");
     return;
   }
 
@@ -492,6 +498,9 @@ function renderPreview(xmlCode) {
 
   const rootNode = renderElement(parseResult.root, rootCtx);
   viewport.appendChild(rootNode);
+  
+  // Hide preview footer when content is rendered
+  if (previewFooter) previewFooter.classList.add("hidden");
 }
 
 function parseAndroidXml(xmlCode){
@@ -524,8 +533,12 @@ function autoInjectNamespace(xmlCode) {
     return xmlCode;
   }
 
-  // Matches the first actual layout/widget tag (skips <?xml ?> and <!-- comments -->)
+  // Matches first element start tag (skips <?xml ?>, <!-- comments -->, </closing tags>)
   return xmlCode.replace(/<([a-zA-Z0-9_.-]+)(\s|>)/, (match, tag, boundary) => {
+    // Don't inject into XML declaration, comments, or closing tags
+    if (tag.startsWith("?") || tag.startsWith("!") || tag.startsWith("/")) {
+      return match;
+    }
     return `<${tag} xmlns:android="http://schemas.android.com/apk/res/android"${boundary}`;
   });
 }

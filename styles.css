@@ -24,6 +24,17 @@
   --viewport-text: #f3f4f6;
   --status-bar-text: #ffffff;
   --nav-handle: rgba(156, 163, 175, 0.5);
+  
+  /* Android widget theming (adapts to light/dark) */
+  --widget-bg: #1e1e1e;
+  --widget-border: #333;
+  --widget-text: #f3f4f6;
+  --button-bg: var(--md-primary);
+  --button-text: var(--md-on-primary);
+  --input-bg: #1e1e1e;
+  --input-border: #333;
+  --input-text: #f3f4f6;
+  --input-placeholder: #9ca3af;
 }
 
 /* Light mode variables */
@@ -32,6 +43,13 @@
   --viewport-text: #111827;
   --status-bar-text: #111827;
   --nav-handle: rgba(107, 114, 128, 0.5);
+  --widget-bg: #f9fafb;
+  --widget-border: #d1d5db;
+  --widget-text: #111827;
+  --input-bg: #ffffff;
+  --input-border: #d1d5db;
+  --input-text: #111827;
+  --input-placeholder: #9ca3af;
 }
 
 * { box-sizing: border-box; }
@@ -424,11 +442,33 @@ button.ghost {
   position: relative;
 }
 
+/* Theme transition for smooth dark/light switch */
+.android-viewport,
+.device-screen,
+.status-bar,
+.nav-handle,
+.button,
+.edit-text,
+.card-view,
+.linear-layout,
+.relative-layout,
+.frame-layout,
+.constraint-layout,
+.text-view,
+.image-view,
+.checkbox-container,
+.radio-container,
+.switch-container,
+.progress-container {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
 .linear-layout {
   display: flex;
   min-height: 40px;
   padding: 8px;
-  border: 1px dashed #aaa;
+  border: 1px dashed var(--widget-border);
+  background: var(--widget-bg);
 }
 
 .linear-layout.vertical { flex-direction: column; }
@@ -438,33 +478,79 @@ button.ghost {
   position: relative;
   min-height: 80px;
   padding: 8px;
-  border: 1px dashed #aaa;
+  border: 1px dashed var(--widget-border);
+  background: var(--widget-bg);
+}
+
+.card-view {
+  border-radius: 12px;
+  background: var(--widget-bg);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 16px;
+  border: 1px solid var(--widget-border);
 }
 
 .button {
   font-size: 14px;
-  color: var(--md-on-primary);
-  background-color: var(--md-primary);
+  color: var(--button-text);
+  background-color: var(--button-bg);
   padding: 8px 16px;
   border: none;
   border-radius: 12px;
   margin: 4px;
 }
 
+.button:focus-visible {
+  outline: 2px solid var(--md-secondary);
+  outline-offset: 2px;
+}
+
 .edit-text {
   font-size: 16px;
   padding: 10px;
-  border: 1px solid #BDBDBD;
+  border: 1px solid var(--input-border);
   border-radius: 12px;
   margin: 4px;
+  background: var(--input-bg);
+  color: var(--input-text);
+}
+
+.edit-text::placeholder {
+  color: var(--input-placeholder);
+}
+
+.edit-text:focus-visible {
+  outline: 2px solid var(--md-secondary);
+  outline-offset: 2px;
+  border-color: var(--md-secondary);
+}
+
+.text-view {
+  color: var(--widget-text);
+}
+
+.image-placeholder {
+  color: var(--muted);
+  background: var(--widget-bg);
+}
+
+.checkbox-container,
+.radio-container,
+.switch-container {
+  color: var(--widget-text);
+}
+
+.progress-container {
+  color: var(--md-primary);
 }
 
 .warning-block {
   margin-top: 12px;
   padding: 10px;
   border-radius: 12px;
-  background: #ffffff;
-  color: #222;
+  background: var(--panel2);
+  color: var(--text);
+  border: 1px solid var(--outline);
 }
 
 .error-message {
@@ -472,6 +558,27 @@ button.ghost {
   background-color: var(--md-error);
   padding: 10px;
   border-radius: 12px;
+}
+
+/* Focus states for header controls */
+button:focus-visible,
+.device-select:focus-visible,
+.frame-btn:focus-visible {
+  outline: 2px solid var(--md-secondary);
+  outline-offset: 2px;
+}
+
+/* Preview footer - hide when content exists */
+.preview-footer {
+  padding: 12px;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+  border-top: 1px solid var(--outline);
+}
+
+.preview-footer.hidden {
+  display: none;
 }
 
 /* Scrollbar styling for viewport */
