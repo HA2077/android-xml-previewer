@@ -30,3 +30,7 @@ A lightweight web tool designed to help developers and students write and previe
 ## License
 
 This project is licensed under the GNU General Public License v3.0.
+
+## Credits
+
+Special thanks to [jesselsookha/android-xml-previewer](https://github.com/jesselsookha/android-xml-previewer) - this project was forked from their excellent work.

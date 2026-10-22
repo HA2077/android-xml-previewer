@@ -761,7 +761,7 @@ const RENDERERS = {
     const div = document.createElement("div");
     div.className = "android-element";
     div.style.minHeight = "12px";
-    div.style.background = "#ddd";
+    div.style.background = "var(--widget-border)";
     div.style.borderRadius = "8px";
     return div;
   },
@@ -889,7 +889,7 @@ function finalizeRelativeLayout(container) {
     if (id) idMap.set(id, child);
   });
 
-  // Pass 1: Apply all non-below rules (parent alignment, centering)
+  // Pass 1: Apply parent alignment/centering rules (no measurements needed)
   for (let pass = 0; pass < 4; pass++) {
     children.forEach(child => {
       const rulesJson = child.dataset.relativeRules;
@@ -900,14 +900,41 @@ function finalizeRelativeLayout(container) {
     });
   }
 
-  // Pass 2: Apply 'below' rules after layout (requires DOM measurements)
+  // Pass 2: Apply positional rules after layout (requires DOM measurements)
   requestAnimationFrame(() => {
     children.forEach(child => {
       const rulesJson = child.dataset.relativeRules;
       if (!rulesJson) return;
       const rules = safeJsonParse(rulesJson);
-      if (!rules || !rules.below) return;
-      applyBelowRule(container, child, rules.below, idMap);
+      if (!rules) return;
+      
+      // below
+      if (rules.below) {
+        applyBelowRule(container, child, rules.below, idMap);
+      }
+      
+      // toRightOf, toEndOf, toLeftOf, toStartOf, alignTop, alignBottom
+      const hasPositional = rules.toRightOf || rules.toEndOf || rules.toLeftOf || rules.toStartOf || rules.alignTop || rules.alignBottom;
+      if (hasPositional) {
+        applyRelativeRulesPositional(container, child, rules, idMap);
+      }
+    });
+    
+    // Ensure container height encompasses all positioned children
+    requestAnimationFrame(() => {
+      let maxBottom = 0;
+      let maxRight = 0;
+      children.forEach(child => {
+        const rect = child.getBoundingClientRect();
+        const cRect = container.getBoundingClientRect();
+        const childBottom = rect.bottom - cRect.top;
+        const childRight = rect.right - cRect.left;
+        if (childBottom > maxBottom) maxBottom = childBottom;
+        if (childRight > maxRight) maxRight = childRight;
+      });
+      // Add some padding
+      container.style.minHeight = `${maxBottom + 16}px`;
+      container.style.minWidth = `${maxRight + 16}px`;
     });
   });
 }
@@ -937,6 +964,48 @@ function applyRelativeRulesNoBelow(container, child, rules) {
   if (rules.centerVertical) {
     child.style.top = "50%";
     child.style.transform = (child.style.transform || "") + " translateY(-50%)";
+  }
+}
+
+function applyRelativeRulesPositional(container, child, rules, idMap) {
+  const cRect = container.getBoundingClientRect();
+  
+  // toRightOf / toEndOf - position to the right of target
+  if (rules.toRightOf || rules.toEndOf) {
+    const targetId = rules.toRightOf || rules.toEndOf;
+    const target = idMap.get(targetId);
+    if (target) {
+      const t = target.getBoundingClientRect();
+      child.style.left = `${(t.right - cRect.left)}px`;
+    }
+  }
+  
+  // toLeftOf / toStartOf - position to the left of target
+  if (rules.toLeftOf || rules.toStartOf) {
+    const targetId = rules.toLeftOf || rules.toStartOf;
+    const target = idMap.get(targetId);
+    if (target) {
+      const t = target.getBoundingClientRect();
+      child.style.right = `${(cRect.right - t.left)}px`;
+    }
+  }
+  
+  // alignTop - align top edge with target
+  if (rules.alignTop) {
+    const target = idMap.get(rules.alignTop);
+    if (target) {
+      const t = target.getBoundingClientRect();
+      child.style.top = `${(t.top - cRect.top)}px`;
+    }
+  }
+  
+  // alignBottom - align bottom edge with target
+  if (rules.alignBottom) {
+    const target = idMap.get(rules.alignBottom);
+    if (target) {
+      const t = target.getBoundingClientRect();
+      child.style.bottom = `${(cRect.bottom - t.bottom)}px`;
+    }
   }
 }
 
@@ -989,6 +1058,12 @@ function extractRelativeRules(attrs) {
   rules.centerHorizontal = attrs["android:layout_centerHorizontal"] === "true";
   rules.centerVertical = attrs["android:layout_centerVertical"] === "true";
   rules.below = normalizeAndroidId(attrs["android:layout_below"]);
+  rules.toRightOf = normalizeAndroidId(attrs["android:layout_toRightOf"]);
+  rules.toEndOf = normalizeAndroidId(attrs["android:layout_toEndOf"]);
+  rules.toLeftOf = normalizeAndroidId(attrs["android:layout_toLeftOf"]);
+  rules.toStartOf = normalizeAndroidId(attrs["android:layout_toStartOf"]);
+  rules.alignTop = normalizeAndroidId(attrs["android:layout_alignTop"]);
+  rules.alignBottom = normalizeAndroidId(attrs["android:layout_alignBottom"]);
   return rules;
 }
 
