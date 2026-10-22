@@ -20,6 +20,209 @@ const DEVICE_PROFILES = {
   "tablet": { w: 800, h: 1280 }
 };
 
+const PALETTE_ITEMS = {
+  layouts: [
+    {
+      name: "LinearLayout (vertical)",
+      desc: "Stacks children top-to-bottom.",
+      snippet: `<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp">
+</LinearLayout>`
+    },
+    {
+      name: "LinearLayout (horizontal)",
+      desc: "Stacks children left-to-right.",
+      snippet: `<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp">
+</LinearLayout>`
+    },
+    {
+      name: "Weighted Playground",
+      desc: "0dp + layout_weight distribution (1 : 1 : 2).",
+      snippet: `<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp">
+    <Button
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="1x" />
+    <Button
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="1x" />
+    <Button
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:text="2x" />
+</LinearLayout>`
+    },
+    {
+      name: "ScrollView",
+      desc: "Vertical scroll container.",
+      snippet: `<ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+    </LinearLayout>
+</ScrollView>`
+    },
+    {
+      name: "RelativeLayout",
+      desc: "Parent-edge, centering, and below/toRightOf positioning.",
+      snippet: `<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Top Left"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
+    <Button
+        android:id="@+id/action"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Center"
+        android:layout_centerInParent="true" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Below title"
+        android:layout_below="@id/title"
+        android:layout_marginTop="12dp" />
+</RelativeLayout>`
+    },
+    {
+      name: "RadioGroup",
+      desc: "Container for RadioButtons.",
+      snippet: `<RadioGroup
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <RadioButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Option 1" />
+    <RadioButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Option 2" />
+</RadioGroup>`
+    }
+  ],
+  widgets: [
+    {
+      name: "TextView",
+      desc: "Displays text.",
+      snippet: `<TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="New Text"
+    android:textSize="16sp" />`
+    },
+    {
+      name: "Button",
+      desc: "Clickable button.",
+      snippet: `<Button
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="Button" />`
+    },
+    {
+      name: "EditText",
+      desc: "User input text box.",
+      snippet: `<EditText
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:hint="Type here" />`
+    },
+    {
+      name: "ImageView",
+      desc: "Displays an image placeholder.",
+      snippet: `<ImageView
+    android:layout_width="64dp"
+    android:layout_height="64dp"
+    android:contentDescription="Image" />`
+    },
+    {
+      name: "CheckBox",
+      desc: "Two-state checkbox.",
+      snippet: `<CheckBox
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Check me" />`
+    },
+    {
+      name: "RadioButton",
+      desc: "Radio selection button.",
+      snippet: `<RadioButton
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Option" />`
+    },
+    {
+      name: "Switch",
+      desc: "Toggle switch.",
+      snippet: `<Switch
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Enable" />`
+    },
+    {
+      name: "ProgressBar (circular)",
+      desc: "Loading spinner.",
+      snippet: `<ProgressBar
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" />`
+    },
+    {
+      name: "View (block)",
+      desc: "Generic divider/block.",
+      snippet: `<View
+    android:layout_width="match_parent"
+    android:layout_height="12dp"
+    android:background="#DDDDDD" />`
+    }
+  ],
+  advanced: [
+    {
+      name: "ConstraintLayout",
+      desc: "Parent constraint template.",
+      snippet: `<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Centered"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>`
+    }
+  ]
+};
+
 let orientation = "portrait";
 let editor = null;
 let radioGroupCounter = 0;
@@ -177,7 +380,6 @@ document.addEventListener("DOMContentLoaded", () => {
 function resetPreviewToWelcome() {
   const viewport = document.getElementById("androidViewport");
   const warningsHost = getOrCreateWarningsHost();
-  const previewFooter = document.querySelector(".preview-footer");
   
   viewport.replaceChildren();
   warningsHost.replaceChildren();
@@ -189,9 +391,6 @@ function resetPreviewToWelcome() {
     <p>Use the sample XML or paste your own, then click <strong>Show Preview</strong>.</p>
   `;
   viewport.appendChild(welcome);
-  
-  // Show preview footer when welcome message is shown
-  if (previewFooter) previewFooter.classList.remove("hidden");
 }
 
 function getOrCreateWarningsHost() {
@@ -211,212 +410,9 @@ function getOrCreateWarningsHost() {
    3) Palette: Snippets
    ========================================================= */
 function buildPalette() {
-  const layouts = [
-    {
-      name: "LinearLayout (vertical)",
-      desc: "Stacks children top-to-bottom.",
-      snippet: `<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="8dp">
-</LinearLayout>`
-    },
-    {
-      name: "LinearLayout (horizontal)",
-      desc: "Stacks children left-to-right.",
-      snippet: `<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="8dp">
-</LinearLayout>`
-    },
-    {
-      name: "Weighted Playground",
-      desc: "0dp + layout_weight distribution (1 : 1 : 2).",
-      snippet: `<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="8dp">
-    <Button
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="1x" />
-    <Button
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="1x" />
-    <Button
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="2"
-        android:text="2x" />
-</LinearLayout>`
-    },
-    {
-      name: "ScrollView",
-      desc: "Vertical scroll container.",
-      snippet: `<ScrollView
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-    </LinearLayout>
-</ScrollView>`
-    },
-    {
-      name: "RelativeLayout",
-      desc: "Parent-edge, centering, and below/toRightOf positioning.",
-      snippet: `<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp">
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Top Left"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true" />
-    <Button
-        android:id="@+id/action"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Center"
-        android:layout_centerInParent="true" />
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Below title"
-        android:layout_below="@id/title"
-        android:layout_marginTop="12dp" />
-</RelativeLayout>`
-    },
-    {
-      name: "RadioGroup",
-      desc: "Container for RadioButtons.",
-      snippet: `<RadioGroup
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-    <RadioButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Option 1" />
-    <RadioButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Option 2" />
-</RadioGroup>`
-    }
-  ];
-
-  const widgets = [
-    {
-      name: "TextView",
-      desc: "Displays text.",
-      snippet: `<TextView
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="New Text"
-    android:textSize="16sp" />`
-    },
-    {
-      name: "Button",
-      desc: "Clickable button.",
-      snippet: `<Button
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:text="Button" />`
-    },
-    {
-      name: "EditText",
-      desc: "User input text box.",
-      snippet: `<EditText
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:hint="Type here" />`
-    },
-    {
-      name: "ImageView",
-      desc: "Displays an image placeholder.",
-      snippet: `<ImageView
-    android:layout_width="64dp"
-    android:layout_height="64dp"
-    android:contentDescription="Image" />`
-    },
-    {
-      name: "CheckBox",
-      desc: "Two-state checkbox.",
-      snippet: `<CheckBox
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Check me" />`
-    },
-    {
-      name: "RadioButton",
-      desc: "Radio selection button.",
-      snippet: `<RadioButton
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Option" />`
-    },
-    {
-      name: "Switch",
-      desc: "Toggle switch.",
-      snippet: `<Switch
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Enable" />`
-    },
-    {
-      name: "ProgressBar (circular)",
-      desc: "Loading spinner.",
-      snippet: `<ProgressBar
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content" />`
-    },
-    {
-      name: "View (block)",
-      desc: "Generic divider/block.",
-      snippet: `<View
-    android:layout_width="match_parent"
-    android:layout_height="12dp"
-    android:background="#DDDDDD" />`
-    }
-  ];
-
-  const advanced = [
-    {
-      name: "ConstraintLayout",
-      desc: "Parent constraint template.",
-      snippet: `<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp">
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Centered"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>`
-    }
-  ];
-
-  injectPaletteItems("paletteLayouts", layouts);
-  injectPaletteItems("paletteWidgets", widgets);
-  injectPaletteItems("paletteAdvanced", advanced);
+  injectPaletteItems("paletteLayouts", PALETTE_ITEMS.layouts);
+  injectPaletteItems("paletteWidgets", PALETTE_ITEMS.widgets);
+  injectPaletteItems("paletteAdvanced", PALETTE_ITEMS.advanced);
 }
 
 function injectPaletteItems(containerId, items) {
@@ -465,7 +461,6 @@ function insertSnippet(snippet) {
 function renderPreview(xmlCode) {
   const viewport = document.getElementById("androidViewport");
   const warningsHost = getOrCreateWarningsHost();
-  const previewFooter = document.querySelector(".preview-footer");
   
   if (!viewport) {
     resetPreviewToWelcome();
@@ -481,7 +476,6 @@ function renderPreview(xmlCode) {
   if (parseResult.error) {
     viewport.appendChild(makeError(parseResult.error));
     viewport.appendChild(makeHintBox());
-    if (previewFooter) previewFooter.classList.remove("hidden");
     return;
   }
 
@@ -498,9 +492,6 @@ function renderPreview(xmlCode) {
 
   const rootNode = renderElement(parseResult.root, rootCtx);
   viewport.appendChild(rootNode);
-  
-  // Hide preview footer when content is rendered
-  if (previewFooter) previewFooter.classList.add("hidden");
 }
 
 function parseAndroidXml(xmlCode){
@@ -616,6 +607,24 @@ function isContainerTag(tag) {
 /* =========================================================
    6) Tag Renderers Registry
    ========================================================= */
+
+function makeScrollView(axis) {
+  return () => {
+    const div = document.createElement("div");
+    div.className = "android-element frame-layout";
+    if (axis === "vertical") {
+      div.style.overflowY = "auto";
+      div.style.overflowX = "hidden";
+      div.style.maxHeight = "100%";
+    } else {
+      div.style.overflowX = "auto";
+      div.style.overflowY = "hidden";
+      div.style.whiteSpace = "nowrap";
+    }
+    return div;
+  };
+}
+
 const RENDERERS = {
   LinearLayout: (el, attrs) => {
     const div = document.createElement("div");
@@ -640,22 +649,8 @@ const RENDERERS = {
     div.className = "android-element frame-layout";
     return div;
   },
-  ScrollView: () => {
-    const div = document.createElement("div");
-    div.className = "android-element frame-layout";
-    div.style.overflowY = "auto";
-    div.style.overflowX = "hidden";
-    div.style.maxHeight = "100%";
-    return div;
-  },
-  HorizontalScrollView: () => {
-    const div = document.createElement("div");
-    div.className = "android-element frame-layout";
-    div.style.overflowX = "auto";
-    div.style.overflowY = "hidden";
-    div.style.whiteSpace = "nowrap";
-    return div;
-  },
+  ScrollView: makeScrollView("vertical"),
+  HorizontalScrollView: makeScrollView("horizontal"),
   RadioGroup: () => {
     const div = document.createElement("div");
     div.className = "android-element radio-group";
@@ -1130,11 +1125,7 @@ function makeError(message) {
 
 function makeHintBox() {
   const div = document.createElement("div");
-  div.style.marginTop = "10px";
-  div.style.padding = "10px";
-  div.style.borderRadius = "12px";
-  div.style.background = "#fff3cd";
-  div.style.color = "#5a4500";
+  div.className = "hint-box";
   div.innerHTML = `<strong>Tip:</strong> Ensure all XML tags are closed properly and you have a single root layout.`;
   return div;
 }
@@ -1212,7 +1203,6 @@ async function captureViewport() {
     const canvas = await html2canvas(screenElem, {
       scale: 2,
       useCORS: true,
-      allowTaint: true,
       backgroundColor: isDarkMode ? "#0F172A" : "#FFFFFF"
     });
     return canvas;

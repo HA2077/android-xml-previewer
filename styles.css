@@ -488,41 +488,6 @@ button.ghost {
   border: 1px solid var(--widget-border);
 }
 
-.button {
-  font-size: 14px;
-  color: var(--button-text);
-  background-color: var(--button-bg);
-  padding: 8px 16px;
-  border: none;
-  border-radius: 12px;
-  margin: 4px;
-}
-
-.button:focus-visible {
-  outline: 2px solid var(--md-secondary);
-  outline-offset: 2px;
-}
-
-.edit-text {
-  font-size: 16px;
-  padding: 10px;
-  border: 1px solid var(--input-border);
-  border-radius: 12px;
-  margin: 4px;
-  background: var(--input-bg);
-  color: var(--input-text);
-}
-
-.edit-text::placeholder {
-  color: var(--input-placeholder);
-}
-
-.edit-text:focus-visible {
-  outline: 2px solid var(--md-secondary);
-  outline-offset: 2px;
-  border-color: var(--md-secondary);
-}
-
 .text-view {
   color: var(--widget-text);
 }
@@ -558,25 +523,20 @@ button.ghost {
   border-radius: 12px;
 }
 
+.hint-box {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 12px;
+  background: #fff3cd;
+  color: #5a4500;
+}
+
 /* Focus states for header controls */
 button:focus-visible,
 .device-select:focus-visible,
 .frame-btn:focus-visible {
   outline: 2px solid var(--md-secondary);
   outline-offset: 2px;
-}
-
-/* Preview footer - hide when content exists */
-.preview-footer {
-  padding: 12px;
-  color: var(--muted);
-  font-size: 12px;
-  text-align: center;
-  border-top: 1px solid var(--outline);
-}
-
-.preview-footer.hidden {
-  display: none;
 }
 
 /* Scrollbar styling for viewport */
