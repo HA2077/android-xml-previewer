@@ -112,6 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("renderButton").addEventListener("click", () => {
     renderPreview(editor.getValue());
   });
+  document.getElementById("screenshotButton").addEventListener("click", takeScreenshot);
   document.getElementById("resetSampleButton").addEventListener("click", () => {
     editor.setValue(sampleXml);
   });
@@ -950,4 +951,34 @@ function makeWarnings(items) {
   });
   wrap.appendChild(ul);
   return wrap;
+}
+
+/* =========================================================
+   Screenshot Exporter
+   ========================================================= */
+function takeScreenshot() {
+  const deviceFrame = document.querySelector(".device-frame");
+  if (!deviceFrame) return;
+
+  const btn = document.getElementById("screenshotButton");
+  const originalText = btn.textContent;
+  btn.textContent = "Capturing...";
+  btn.disabled = true;
+
+  html2canvas(deviceFrame, {
+    scale: 2,
+    useCORS: true,
+    backgroundColor: null
+  }).then(canvas => {
+    const link = document.createElement("a");
+    link.download = `android_preview_${Date.now()}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  }).catch(err => {
+    console.error("Screenshot error:", err);
+    alert("Could not generate screenshot.");
+  }).finally(() => {
+    btn.textContent = originalText;
+    btn.disabled = false;
+  });
 }

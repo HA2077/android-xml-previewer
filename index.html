@@ -24,8 +24,10 @@
     </div>
     <div class="header-actions">
       <button id="renderButton" class="primary">Show Preview</button>
+      <button id="screenshotButton" class="primary" style="background-color: #03dac6; color: #000;">📸 Screenshot</button>
       <button id="resetSampleButton" class="ghost">Reset Sample</button>
       <button id="clearPreviewButton" class="ghost">Clear Preview</button>
+      
       <!-- Device controls -->
       <div class="device-controls">
         <label class="device-label" for="deviceProfile">Device</label>
@@ -104,9 +106,12 @@
     </section>
   </main>
 
-  <!-- Scripts -->
+  <!-- External Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.0/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.0/mode/xml/xml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  
+  <!-- App Logic -->
   <script src="scripts.js"></script>
 </body>
 </html>
