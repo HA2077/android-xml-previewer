@@ -417,10 +417,6 @@ button.ghost {
   transition: background 0.2s ease;
 }
 
-/* Landscape adjustments */
-.phone-shell.landscape {
-  /* Dimensions swapped via JS */
-}
 
 /* ================= Android Render Styles ================= */
 .android-element {

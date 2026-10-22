@@ -99,6 +99,13 @@ document.addEventListener("DOMContentLoaded", () => {
     root.style.setProperty("--device-h", `${h}px`);
     updateOrientationButton();
     updatePhoneShellSize();
+    reRenderIfNeeded();
+  }
+
+  function reRenderIfNeeded() {
+    if (editor) {
+      renderPreview(editor.getValue());
+    }
   }
 
   function updateOrientationButton() {
@@ -133,11 +140,15 @@ document.addEventListener("DOMContentLoaded", () => {
   frameBtns.forEach(btn => {
     btn.addEventListener("click", () => {
       setDeviceFrame(btn.dataset.frame);
+      reRenderIfNeeded();
     });
   });
 
   // Theme toggle
-  themeToggle.addEventListener("click", toggleSystemTheme);
+  themeToggle.addEventListener("click", () => {
+    toggleSystemTheme();
+    // toggleSystemTheme already calls re-render
+  });
 
   // Initial clock update
   updateClock();
@@ -165,20 +176,10 @@ document.addEventListener("DOMContentLoaded", () => {
    ========================================================= */
 function resetPreviewToWelcome() {
   const viewport = document.getElementById("androidViewport");
-  const warningsHost = document.getElementById("warningsHost");
-  
-  // Create warnings host if it doesn't exist
-  let warningsContainer = document.getElementById("warningsHost");
-  if (!warningsContainer) {
-    warningsContainer = document.createElement("div");
-    warningsContainer.id = "warningsHost";
-    // Insert after viewport in device-screen
-    const deviceScreen = document.getElementById("deviceScreen");
-    deviceScreen.appendChild(warningsContainer);
-  }
+  const warningsHost = getOrCreateWarningsHost();
   
   viewport.replaceChildren();
-  warningsContainer.replaceChildren();
+  warningsHost.replaceChildren();
 
   const welcome = document.createElement("div");
   welcome.className = "welcome-message";
@@ -187,6 +188,19 @@ function resetPreviewToWelcome() {
     <p>Use the sample XML or paste your own, then click <strong>Show Preview</strong>.</p>
   `;
   viewport.appendChild(welcome);
+}
+
+function getOrCreateWarningsHost() {
+  let warningsHost = document.getElementById("warningsHost");
+  if (!warningsHost) {
+    warningsHost = document.createElement("div");
+    warningsHost.id = "warningsHost";
+    const deviceScreen = document.getElementById("deviceScreen");
+    if (deviceScreen) {
+      deviceScreen.appendChild(warningsHost);
+    }
+  }
+  return warningsHost;
 }
 
 /* =========================================================
@@ -446,19 +460,13 @@ function insertSnippet(snippet) {
    ========================================================= */
 function renderPreview(xmlCode) {
   const viewport = document.getElementById("androidViewport");
-  let warningsHost = document.getElementById("warningsHost");
+  const warningsHost = getOrCreateWarningsHost();
   
   if (!viewport) {
     resetPreviewToWelcome();
+    return;
   }
   
-  if (!warningsHost) {
-    warningsHost = document.createElement("div");
-    warningsHost.id = "warningsHost";
-    const deviceScreen = document.getElementById("deviceScreen");
-    deviceScreen.appendChild(warningsHost);
-  }
-
   viewport.replaceChildren();
   warningsHost.replaceChildren();
 
@@ -587,6 +595,7 @@ function isContainerTag(tag) {
     "ScrollView",
     "HorizontalScrollView",
     "RadioGroup",
+    "CardView",
     "androidx.constraintlayout.widget.ConstraintLayout"
   ].includes(tag);
 }
@@ -600,6 +609,10 @@ const RENDERERS = {
     div.className = "android-element linear-layout";
     const orientation = (attrs["android:orientation"] || "vertical").toLowerCase();
     div.classList.add(orientation === "horizontal" ? "horizontal" : "vertical");
+    // Ensure horizontal LinearLayout has definite width for weight distribution
+    if (orientation === "horizontal") {
+      div.style.width = "100%";
+    }
     applyContainerGravity(div, attrs["android:gravity"], orientation);
     return div;
   },
@@ -633,6 +646,18 @@ const RENDERERS = {
   RadioGroup: () => {
     const div = document.createElement("div");
     div.className = "android-element radio-group";
+    return div;
+  },
+  CardView: (el, attrs) => {
+    const div = document.createElement("div");
+    div.className = "android-element card-view";
+    const radius = parseDimensionToPixels(attrs["app:cardCornerRadius"] || attrs["android:cardCornerRadius"] || "8dp");
+    const elevation = attrs["app:cardElevation"] || attrs["android:cardElevation"] || "4dp";
+    const bgColor = parseColor(attrs["app:cardBackgroundColor"] || attrs["android:cardBackgroundColor"] || "#FFFFFF");
+    div.style.borderRadius = radius;
+    div.style.backgroundColor = bgColor;
+    div.style.boxShadow = `0 ${parseDimensionToPixels(elevation)} ${parseDimensionToPixels(elevation)} rgba(0,0,0,0.15)`;
+    div.style.padding = "16px";
     return div;
   },
   TextView: (el, attrs) => {
@@ -682,7 +707,13 @@ const RENDERERS = {
     const input = document.createElement("input");
     input.type = "radio";
     input.checked = (attrs["android:checked"] === "true");
-    input.name = ctx.radioGroupName || "standalone_radio";
+    // Use unique group name for standalone RadioButtons
+    if (ctx.radioGroupName) {
+      input.name = ctx.radioGroupName;
+    } else {
+      const id = attrs["android:id"];
+      input.name = id ? `radio_${normalizeAndroidId(id)}` : `standalone_radio_${++radioGroupCounter}`;
+    }
     label.appendChild(input);
     label.appendChild(document.createTextNode(attrs["android:text"] || "Radio Button"));
     return label;
@@ -845,18 +876,30 @@ function finalizeRelativeLayout(container) {
     if (id) idMap.set(id, child);
   });
 
+  // Pass 1: Apply all non-below rules (parent alignment, centering)
   for (let pass = 0; pass < 4; pass++) {
     children.forEach(child => {
       const rulesJson = child.dataset.relativeRules;
       if (!rulesJson) return;
       const rules = safeJsonParse(rulesJson);
       if (!rules) return;
-      applyRelativeRules(container, child, rules, idMap);
+      applyRelativeRulesNoBelow(container, child, rules);
     });
   }
+
+  // Pass 2: Apply 'below' rules after layout (requires DOM measurements)
+  requestAnimationFrame(() => {
+    children.forEach(child => {
+      const rulesJson = child.dataset.relativeRules;
+      if (!rulesJson) return;
+      const rules = safeJsonParse(rulesJson);
+      if (!rules || !rules.below) return;
+      applyBelowRule(container, child, rules.below, idMap);
+    });
+  });
 }
 
-function applyRelativeRules(container, child, rules, idMap) {
+function applyRelativeRulesNoBelow(container, child, rules) {
   child.style.top = "";
   child.style.left = "";
   child.style.right = "";
@@ -882,15 +925,15 @@ function applyRelativeRules(container, child, rules, idMap) {
     child.style.top = "50%";
     child.style.transform = (child.style.transform || "") + " translateY(-50%)";
   }
+}
 
+function applyBelowRule(container, child, belowId, idMap) {
+  const target = idMap.get(belowId);
+  if (!target) return;
+  
   const cRect = container.getBoundingClientRect();
-  if (rules.below) {
-    const target = idMap.get(rules.below);
-    if (target) {
-      const t = target.getBoundingClientRect();
-      child.style.top = `${(t.bottom - cRect.top)}px`;
-    }
-  }
+  const t = target.getBoundingClientRect();
+  child.style.top = `${(t.bottom - cRect.top)}px`;
 }
 
 function finalizeConstraintLayoutParentOnly(container) {
