@@ -4,42 +4,28 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Android Layout Previewer</title>
-
   <!-- CodeMirror -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.0/codemirror.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.0/theme/material.min.css">
-
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Mono:wght@400;500;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-
   <link rel="stylesheet" href="styles.css" />
 </head>
-
 <body>
   <!-- Header -->
   <header class="app-header">
     <div class="header-left">
       <h1>Android Layout Previewer</h1>
       <p class="subtitle">
-        Write or paste Android XML, then click <strong>Show Preview</strong>. (LinearLayout-first, beginner-friendly.)
+        Write or paste Android XML, then click <strong>Show Preview</strong>.
       </p>
     </div>
-
     <div class="header-actions">
       <button id="renderButton" class="primary">Show Preview</button>
       <button id="resetSampleButton" class="ghost">Reset Sample</button>
       <button id="clearPreviewButton" class="ghost">Clear Preview</button>
-
-      <!-- Resource Management Buttons -->
-      <button id="manageStringsButton" class="ghost resource-btn" title="Manage String Resources">
-        📝 Strings
-      </button>
-      <button id="manageColorsButton" class="ghost resource-btn" title="Manage Color Resources">
-        🎨 Colors
-      </button>
-
       <!-- Device controls -->
       <div class="device-controls">
         <label class="device-label" for="deviceProfile">Device</label>
@@ -49,7 +35,6 @@
           <option value="phone-lg">Phone (Large) 412×915</option>
           <option value="tablet">Tablet 800×1280</option>
         </select>
-
         <button id="toggleOrientationButton" class="ghost small-btn" title="Toggle portrait/landscape">
           Portrait
         </button>
@@ -65,19 +50,16 @@
         <h2>Palette</h2>
         <p class="palette-hint">Click an item to insert XML at the cursor (auto-indented).</p>
       </div>
-
       <div class="palette-section">
         <h3>Layouts</h3>
         <div class="palette-list" id="paletteLayouts"></div>
       </div>
-
       <div class="palette-section">
         <h3>Widgets</h3>
         <div class="palette-list" id="paletteWidgets"></div>
       </div>
-
       <div class="palette-section">
-        <h3>Advanced (Placeholder)</h3>
+        <h3>Advanced</h3>
         <div class="palette-list" id="paletteAdvanced"></div>
       </div>
     </aside>
@@ -91,9 +73,7 @@
           <span class="badge">XML</span>
         </div>
       </div>
-
       <textarea id="xmlCode" placeholder="Paste your Android XML layout code here"></textarea>
-
       <div class="editor-footer">
         <span class="tip">
           Tip: Root XML should include <code>xmlns:android</code>. Most widgets need <code>layout_width</code> and <code>layout_height</code>.
@@ -107,109 +87,22 @@
         <h2>Preview</h2>
         <div class="panel-badges">
           <span class="badge">Device Frame</span>
-          <span class="badge">Resources Enabled</span>
+          <span class="badge">Live Preview</span>
         </div>
       </div>
-
       <div class="device-frame">
         <div class="device-notch"></div>
         <div id="previewPanel" class="device-screen">
-          <!-- The JS will build the content here -->
+          <!-- JS will render layout here -->
         </div>
       </div>
-
       <div class="preview-footer">
         <p class="small">
-          Click <strong>Show Preview</strong> to render. Use <strong>@string/name</strong> and <strong>@color/name</strong> to reference resources.
+          Click <strong>Show Preview</strong> to render your layout into the simulated view.
         </p>
       </div>
     </section>
   </main>
-
-  <!-- Strings Resource Modal -->
-  <div id="stringsModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>📝 String Resources (strings.xml)</h2>
-        <button class="modal-close" id="closeStringsModal">&times;</button>
-      </div>
-      
-      <div class="modal-body">
-        <div class="resource-info">
-          <p>Manage your string resources. Reference them in XML using <code>android:text="@string/name"</code></p>
-        </div>
-
-        <div class="resource-add-section">
-          <h3>Add New String</h3>
-          <div class="input-group">
-            <label for="stringName">Name:</label>
-            <input type="text" id="stringName" placeholder="e.g., app_name" />
-          </div>
-          <div class="input-group">
-            <label for="stringValue">Value:</label>
-            <input type="text" id="stringValue" placeholder="e.g., My App" />
-          </div>
-          <button id="addStringButton" class="primary">Add String</button>
-        </div>
-
-        <div class="resource-list-section">
-          <h3>Current Strings</h3>
-          <div id="stringsList" class="resource-list">
-            <!-- Dynamically populated -->
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button id="exportStringsXML" class="ghost">Export strings.xml</button>
-        <button id="closeStringsModalBtn" class="primary">Done</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Colors Resource Modal -->
-  <div id="colorsModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>🎨 Color Resources (colors.xml)</h2>
-        <button class="modal-close" id="closeColorsModal">&times;</button>
-      </div>
-      
-      <div class="modal-body">
-        <div class="resource-info">
-          <p>Manage your color resources. Reference them in XML using <code>android:textColor="@color/name"</code></p>
-        </div>
-
-        <div class="resource-add-section">
-          <h3>Add New Color</h3>
-          <div class="input-group">
-            <label for="colorName">Name:</label>
-            <input type="text" id="colorName" placeholder="e.g., primary" />
-          </div>
-          <div class="input-group">
-            <label for="colorValue">Value:</label>
-            <div class="color-input-wrapper">
-              <input type="color" id="colorPicker" value="#6200EE" />
-              <input type="text" id="colorValue" placeholder="#6200EE" value="#6200EE" />
-            </div>
-          </div>
-          <button id="addColorButton" class="primary">Add Color</button>
-        </div>
-
-        <div class="resource-list-section">
-          <h3>Current Colors</h3>
-          <div id="colorsList" class="resource-list">
-            <!-- Dynamically populated -->
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button id="exportColorsXML" class="ghost">Export colors.xml</button>
-        <button id="closeColorsModalBtn" class="primary">Done</button>
-      </div>
-    </div>
-  </div>
 
   <!-- Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.0/codemirror.min.js"></script>
