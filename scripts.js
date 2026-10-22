@@ -435,22 +435,40 @@ function renderPreview(xmlCode) {
   layoutHost.appendChild(rootNode);
 }
 
-function parseAndroidXml(xmlCode) {
+function parseAndroidXml(xmlCode){
   try {
+    // Inject missing namespace if omitted by user
+    const sanitizedXml = autoInjectNamespace(xmlCode);
+
     const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(xmlCode, "text/xml");
+    const xmlDoc = parser.parseFromString(sanitizedXml, "text/xml");
     const parserError = xmlDoc.querySelector("parsererror");
-    if (parserError) {
+    if (parserError)
       return { error: "XML Parsing Error: " + parserError.textContent.trim() };
-    }
     const root = xmlDoc.documentElement;
-    if (!root) {
+    if (!root)
       return { error: "No valid XML root element found." };
-    }
     return { root };
   } catch (err) {
     return { error: "Error processing XML: " + err.message };
   }
+}
+
+/* =========================================================
+   Auto-Inject Missing Android Namespace
+   ========================================================= */
+function autoInjectNamespace(xmlCode) {
+  if (!xmlCode || typeof xmlCode !== "string") return xmlCode;
+
+  // Skip if namespace is already defined
+  if (xmlCode.includes("xmlns:android=")) {
+    return xmlCode;
+  }
+
+  // Matches the first actual layout/widget tag (skips <?xml ?> and <!-- comments -->)
+  return xmlCode.replace(/<([a-zA-Z0-9_.-]+)(\s|>)/, (match, tag, boundary) => {
+    return `<${tag} xmlns:android="http://schemas.android.com/apk/res/android"${boundary}`;
+  });
 }
 
 /* =========================================================
