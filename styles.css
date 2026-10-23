@@ -411,7 +411,7 @@ button.ghost {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 16px;
+  padding: 0;
   background: var(--viewport-bg);
   color: var(--viewport-text);
 }
@@ -465,9 +465,9 @@ button.ghost {
 
 .linear-layout {
   display: flex;
-  min-height: 40px;
-  padding: 8px;
-  background: var(--widget-bg);
+  min-height: 0;
+  padding: 0;
+  background: transparent;
 }
 
 .linear-layout.vertical { flex-direction: column; }
@@ -476,9 +476,16 @@ button.ghost {
 .relative-layout, .frame-layout, .constraint-layout {
   position: relative;
   min-height: 80px;
-  padding: 8px;
-  background: var(--widget-bg);
+  padding: 0;
+  background: transparent;
 }
+
+.frame-layout { min-height: 0; }
+
+/* Messages need their own spacing now that the viewport has no padding */
+.welcome-message { padding: 16px; }
+.android-viewport > .error-message { margin: 16px 16px 0; }
+.android-viewport > .hint-box { margin: 10px 16px; }
 
 .card-view {
   border-radius: 12px;
@@ -721,10 +728,6 @@ button:focus-visible,
   flex-direction: column;
   gap: 8px;
   color: var(--widget-text);
-}
-
-.switch-container > div:first-child {
-  /* label text */
 }
 
 .switch {

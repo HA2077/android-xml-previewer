@@ -810,6 +810,18 @@ function applyAndroidStyles(node, attrs) {
     if (ts.includes("italic")) node.style.fontStyle = "italic";
   }
 
+  // TextView / Button / EditText text alignment
+  const gravityAttr = attrs["android:gravity"] || "";
+  const textAlignAttr = attrs["android:textAlignment"] || "";
+  if (node.classList && (node.classList.contains("text-view") || node.classList.contains("button") || node.classList.contains("edit-text"))) {
+    const g = gravityAttr.split("|").map(x => x.trim());
+    if (g.includes("center") || g.includes("center_horizontal") || textAlignAttr === "center") node.style.textAlign = "center";
+    else if (g.includes("right") || g.includes("end") || textAlignAttr === "viewEnd") node.style.textAlign = "right";
+  }
+  if (attrs["android:textAllCaps"]) node.style.textTransform = attrs["android:textAllCaps"] === "true" ? "uppercase" : "none";
+  if (attrs["android:minHeight"]) node.style.minHeight = parseDimensionToPixels(attrs["android:minHeight"]);
+  if (attrs["android:minWidth"]) node.style.minWidth = parseDimensionToPixels(attrs["android:minWidth"]);
+
   if (attrs["android:layout_weight"]) {
     const w = parseFloat(attrs["android:layout_weight"]);
     if (!Number.isNaN(w)) {
@@ -856,7 +868,13 @@ function parseDimensionToPixels(dimension) {
 
 function parseColor(color) {
   if (!color) return "inherit";
-  if (color.startsWith("#")) return color;
+  if (color.startsWith("#")) {
+    const hex = color.slice(1);
+    // Android uses #AARRGGBB (and #ARGB); CSS uses #RRGGBBAA (and #RGBA)
+    if (/^[0-9a-fA-F]{8}$/.test(hex)) return "#" + hex.slice(2) + hex.slice(0, 2);
+    if (/^[0-9a-fA-F]{4}$/.test(hex)) return "#" + hex.slice(1) + hex[0];
+    return color;
+  }
   if (color.startsWith("@android:color/")) {
     const name = color.replace("@android:color/", "");
     switch (name) {
@@ -1048,6 +1066,8 @@ function extractRelativeRules(attrs) {
   rules.alignParentTop = attrs["android:layout_alignParentTop"] === "true";
   rules.alignParentBottom = attrs["android:layout_alignParentBottom"] === "true";
   rules.alignParentLeft = attrs["android:layout_alignParentLeft"] === "true";
+  rules.alignParentStart = attrs["android:layout_alignParentStart"] === "true";
+  rules.alignParentEnd = attrs["android:layout_alignParentEnd"] === "true";
   rules.alignParentRight = attrs["android:layout_alignParentRight"] === "true";
   rules.centerInParent = attrs["android:layout_centerInParent"] === "true";
   rules.centerHorizontal = attrs["android:layout_centerHorizontal"] === "true";
@@ -1084,10 +1104,19 @@ function mapInputType(type) {
 
 function applyContainerGravity(container, gravity, orientation) {
   if (!gravity) return;
-  if (gravity.includes("center")) {
-    container.style.justifyContent = "center";
-    container.style.alignItems = "center";
-  }
+  const g = gravity.split("|").map(x => x.trim());
+  const has = (k) => g.includes(k);
+  const centerH = has("center") || has("center_horizontal");
+  const centerV = has("center") || has("center_vertical");
+  const endH = has("right") || has("end");
+  const endV = has("bottom");
+  const pick = (center, end) => center ? "center" : (end ? "flex-end" : null);
+  const isVertical = orientation !== "horizontal";
+  // Vertical layout: main axis = vertical. Horizontal layout: main axis = horizontal.
+  const main  = isVertical ? pick(centerV, endV) : pick(centerH, endH);
+  const cross = isVertical ? pick(centerH, endH) : pick(centerV, endV);
+  if (main)  container.style.justifyContent = main;
+  if (cross) container.style.alignItems = cross;
 }
 
 function applyLayoutGravity(node, gravity) {
