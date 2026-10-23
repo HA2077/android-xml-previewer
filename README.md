@@ -27,6 +27,9 @@ A lightweight web tool designed to help developers and students write and previe
 | **Layout Containers** | `LinearLayout`, `RelativeLayout`, `FrameLayout`, `ScrollView`, `ConstraintLayout`, `RadioGroup` |
 | **Widgets** | `TextView`, `Button`, `EditText`, `ImageView`, `CheckBox`, `RadioButton`, `Switch`, `ProgressBar`, `View` |
 
+## For Usage notes
+Open [UsageGuide.md](UsageGuide.md) for a detailed guide on how to use the previewer effectively.
+
 ## License
 
 This project is licensed under the GNU General Public License v3.0.
