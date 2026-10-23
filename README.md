@@ -2,6 +2,9 @@
 
 A lightweight web tool designed to help developers and students write and preview Android XML layout files instantly in the browser without requiring Android Studio.
 
+## Try it Right Now
+[Android layout previewer](https://ha2077.github.io/android-xml-previewer/)
+
 ## Features
 
 - **Live XML Code Editing**: Fully feature-packed editor powered by CodeMirror with syntax highlighting and auto-indentation.
