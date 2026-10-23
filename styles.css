@@ -1,3 +1,17 @@
+/*
+ * Android Layout Previewer
+ * Forked from: https://github.com/jesselsookha/android-xml-previewer
+ *
+ * This file was modified by Hassan Ahmed on 2026-10-23.
+ * Changes: text gravity/textAlignment support, per-axis container gravity,
+ * removed default padding/background on layouts and viewport, #AARRGGBB color
+ * conversion, layout_alignParentStart/End, textAllCaps, minWidth/minHeight,
+ * plus Adding screenshot functionality.
+ *
+ * Licensed under the GNU General Public License v3.0 (see LICENSE).
+ */
+
+
 /* =========================================================
    Android Layout Previewer
    ========================================================= */
